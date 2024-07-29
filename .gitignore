@@ -1,0 +1,6 @@
+*.code-workspace
+*.vscode
+*__pycache__*
+notebook_testing
+*docs/build*
+paper_psf

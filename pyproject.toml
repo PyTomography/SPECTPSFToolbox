@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling", "toml"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spectpsftoolbox"
+version = "0.1.0"
+
+authors = [
+  { name="Luke Polson", email="lukepolson@outlook.com" },
+]
+description = "Library for creation of point spread functions"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "numpy>=1.24.2",
+  "torch>=1.10.2",
+  "fft-conv-pytorch>=1.2.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/spectpsftoolbox"]
+
+[project.urls]
+"Homepage" = "https://github.com/qurit/SPECTPSFToolbox"
+"Bug Tracker" = "https://github.com/qurit/SPECTPSFToolbox/issues"
+
+[project.optional-dependencies]
+doc = [
+  "toml",
+  "sphinx~=6.2.1",
+  "myst-parser",
+  "furo",
+  "nbsphinx",
+  "sphinx-autoapi~=3.0.0",
+  "ipykernel",
+  "pydata-sphinx-theme"
+]
+
