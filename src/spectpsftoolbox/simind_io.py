@@ -46,7 +46,7 @@ def get_header_value(
             return values[0]
     return values
 
-def get_projections_from_single_file(headerfile: str):
+def get_projections_from_single_file(headerfile: str) -> torch.Tensor:
     """Gets projection data from a SIMIND header file.
 
     Args:
@@ -74,16 +74,30 @@ def get_projections_from_single_file(headerfile: str):
     projections = torch.tensor(projections.copy())
     return projections
 
-def get_projections(headerfiles: str | Sequence[str], weights: float = None):
+def get_projections(headerfiles: str | Sequence[str]) -> torch.Tensor:
+    """Obtains projection PSF data from a list of headerfiles and concatenates them together
+
+    Args:
+        headerfiles (str | Sequence[str]): List of length Ld corresponding to all projections at different source-detector distances.
+
+    Returns:
+        torch.Tensor[Ld,Lx,Ly]: Output tensor of PSF data at each source-detector distance
+    """
     projectionss = []
     for headerfile in headerfiles:
         projections = get_projections_from_single_file(headerfile)
-        if weights is not None:
-            projections *= weights
         projectionss.append(projections)
     return torch.stack(projectionss)
 
-def get_radii(resfiles: str, device='cpu'):
+def get_source_detector_distances(resfiles: str) -> torch.Tensor:
+    """Obtains the source-detector distance from a list of resfiles
+
+    Args:
+        resfiles (str): List of .res files (of length Ld) corresponding to each simulated PSF projection
+
+    Returns:
+        torch.Tensor[Ld]: List of source-detector distances
+    """
     radii = []
     for resfile in resfiles:
         with open(resfile) as f:
@@ -93,7 +107,16 @@ def get_radii(resfiles: str, device='cpu'):
         radii.append(radius)
     return torch.tensor(radii)
 
-def get_meshgrid(resfiles: str, device = 'cpu'):
+def get_meshgrid(resfiles: str, device = 'cpu') -> tuple[torch.Tensor, torch.Tensor]:
+    """Obtains a meshgrid of the x and y coordinates correpsonding to the PSF data simulated
+
+    Args:
+        resfiles (str): List of .res files (of length Ld) corresponding to each simulated PSF projection
+        device (str, optional): Device to place the output projection data on. Defaults to 'cpu'.
+
+    Returns:
+        tuple[torch.Tensor, torch.Tensor]: Meshgrid of x and y coordinates
+    """
     with open(resfiles[0]) as f:
         resdata = f.readlines()
     resdata = np.array(resdata)

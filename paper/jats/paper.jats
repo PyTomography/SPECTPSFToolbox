@@ -230,8 +230,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <p>‘Kernel1D‘: objects that take in 1D position
       <inline-formula><alternatives>
       <tex-math><![CDATA[x]]></tex-math>
-      <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>,source-detector
-      distance <inline-formula><alternatives>
+      <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>,
+      source-detector distance <inline-formula><alternatives>
       <tex-math><![CDATA[d]]></tex-math>
       <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>d</mml:mi></mml:math></alternatives></inline-formula>,
       hyperparameters <inline-formula><alternatives>
@@ -335,22 +335,23 @@ a Creative Commons Attribution 4.0 International License (CC BY
   5, the form of the SPECT PSF is exploited and a 2D LSI operator is
   built using 1D convolutions and rotations. In tutorial 7, this is
   shown to lead to faster reconstruction than application of a 2D
-  convolution but with the same results. Operators must also implement a
-  <monospace>normalization_constant(xv,yv,d)</monospace> method. The
-  <monospace>__add__</monospace> and <monospace>__mult__</monospace>
-  methods of operators have been implemented so that multiple PSF
-  operators can be chained together; adding operators together yields an
-  operator that returns the sum of the two PSFs applied to the input
-  data, while multiplying operators yields an operator that returns
-  successive operation of the PSFs applied to the input data.
-  Propagation of normalization is implemented to ensure the
-  normalization of the chained operator is properly implemented. In a
-  gamma camera, for example, there are two components of the PSF: (i)
-  blurring induced from the collimator and (ii) blurring induced from
-  the intrisic resolution of the scintillator crystals. Provided each
-  operator is instantiated as <monospace>psf_coll</monospace> and
-  <monospace>psf_scint</monospace> respectively, the chained PSF
-  operator is <monospace>psf_tot=psf_scint*psf_coll</monospace>; the
+  convolution but with nearly the same results. Operators must also
+  implement a <monospace>normalization_constant(xv,yv,d)</monospace>
+  method. The <monospace>__add__</monospace> and
+  <monospace>__mult__</monospace> methods of operators have been
+  implemented so that multiple PSF operators can be chained together;
+  adding operators together yields an operator that returns the sum of
+  the two PSFs applied to the input data, while multiplying operators
+  yields an operator that returns successive operation of the PSFs
+  applied to the input data. Propagation of normalization is implemented
+  to ensure the normalization of the chained operator is properly
+  implemented. In a gamma camera, for example, there are two components
+  of the PSF: (i) blurring induced from the collimator and (ii) blurring
+  induced from the intrisic resolution of the scintillator crystals.
+  Provided each operator is instantiated as
+  <monospace>psf_coll</monospace> and <monospace>psf_scint</monospace>
+  respectively, the chained PSF operator is
+  <monospace>psf_tot=psf_scint*psf_coll</monospace>; the
   <monospace>__call__</monospace> method of this operator implements</p>
   <p><named-content id="eqU003Apsf_tot" content-type="equation"><disp-formula><alternatives>
   <tex-math><![CDATA[\mathrm{PSF}_{\mathrm{total}} \left[f \right] = \mathrm{PSF}_{\mathrm{scint}}\left[\mathrm{PSF}_{\mathrm{coll}} \left[f \right] \right]
@@ -396,9 +397,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (center) and sample 1D profiles of the reconstructed images (right).
   When the MC PSF kernel that includes GC+SSC+SPC is used, the activity
   in the spheres is significantly higher than when the GC only
-  (Gaussian) kernel is used.</p>
-  <p>The second use case considers reconstruction of MC
-  <inline-formula><alternatives>
+  (Gaussian) kernel is used. The second use case considers
+  reconstruction of MC <inline-formula><alternatives>
   <tex-math><![CDATA[{}^{225}]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:msup><mml:mrow></mml:mrow><mml:mn>225</mml:mn></mml:msup></mml:math></alternatives></inline-formula>Ac
   data. <inline-formula><alternatives>
@@ -409,14 +409,19 @@ a Creative Commons Attribution 4.0 International License (CC BY
   phantom with 3 spheres of diameters 60mm, 37mm, and 28mm filled at a
   6.4:1 source to background ratio with 100MBq of total activity. 440keV
   point source data was simulated via SIMIND at 1100 positions between
-  0cm and 55cm. 12 of these positions were used to fit a chained PSF
-  operator built using the <monospace>GaussianOperator</monospace>,
+  0cm and 55cm. 12 of these positions were used for developing and
+  fitting a PSF operator built using the
+  <monospace>GaussianOperator</monospace>,
   <monospace>Rotate1DConvOperator</monospace>, and
   <monospace>RotateSeperable2DConvOperator</monospace>; each of these
   classes performs 2D shift invariant convolutions using only 1D
-  convolutions and rotations, and is computationally more efficient than
-  directly using 2D convolutions. More details on this model and how it
-  is fit are shown in tutorial 5 on the GitHub page.</p>
+  convolutions and rotations (1D-R). More details on this model and how
+  it is fit are shown in tutorial 5 on the GitHub page. The developed
+  model is compared to a MC based model (2D) that uses the
+  <monospace>NearestKernelOperator</monospace> with the 1100 acquired
+  PSFs acquired from SIMIND. Use of the 1D-R model in image
+  reconstruction reduces the required computation time by a factor of
+  2.5.</p>
   <fig>
     <caption><p>Upper: <inline-formula><alternatives>
     <tex-math><![CDATA[{}^{177}]]></tex-math>
