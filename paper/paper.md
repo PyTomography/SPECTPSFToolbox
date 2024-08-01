@@ -9,13 +9,11 @@ tags:
 authors:
   - name: Luke Polson
     orcid: 0000-0000-0000-0000
-    equal-contrib: true
+    corresponding: true
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: Carlos Uribe
-    corresponding: true # (This is how to denote the corresponding author)
     affiliation: "2, 4, 5"
   - name: Arman Rahmim
-    corresponding: true # (This is how to denote the corresponding author)
     affiliation: "1, 2, 3, 5"
 affiliations:
  - name: Deparment of Physics & Astronomy, University of British Columbia, Vancouver Canada
