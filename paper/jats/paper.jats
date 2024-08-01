@@ -153,8 +153,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
   SPC and SSC and it can no longer be approximated using simple Gaussian
   functions.</p>
   <p>Unfortunately, many currently available open source reconstruction
-  library only provide support for Gaussian PSF modeling. Given the
-  recent success of <inline-formula><alternatives>
+  library only provide support for Gaussian PSF modeling which can only
+  capture the GC. Given the recent success of
+  <inline-formula><alternatives>
   <tex-math><![CDATA[{}^{225}]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:msup><mml:mrow></mml:mrow><mml:mn>225</mml:mn></mml:msup></mml:math></alternatives></inline-formula>Ac
   based radiopharmaceuticals for prostate cancer treatment that emit
@@ -397,8 +398,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (center) and sample 1D profiles of the reconstructed images (right).
   When the MC PSF kernel that includes GC+SSC+SPC is used, the activity
   in the spheres is significantly higher than when the GC only
-  (Gaussian) kernel is used. The second use case considers
-  reconstruction of MC <inline-formula><alternatives>
+  (Gaussian) kernel is used.</p>
+  <p>The second use case considers reconstruction of MC
+  <inline-formula><alternatives>
   <tex-math><![CDATA[{}^{225}]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:msup><mml:mrow></mml:mrow><mml:mn>225</mml:mn></mml:msup></mml:math></alternatives></inline-formula>Ac
   data. <inline-formula><alternatives>
@@ -421,7 +423,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <monospace>NearestKernelOperator</monospace> with the 1100 acquired
   PSFs acquired from SIMIND. Use of the 1D-R model in image
   reconstruction reduces the required computation time by a factor of
-  2.5.</p>
+  2.5, since rotations and 1D convolutions are significantly faster than
+  direct 2D convolution, even when fast fourier transform techniques are
+  used.</p>
   <fig>
     <caption><p>Upper: <inline-formula><alternatives>
     <tex-math><![CDATA[{}^{177}]]></tex-math>
