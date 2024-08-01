@@ -4,3 +4,5 @@
 notebook_testing
 *docs/build*
 paper_psf
+*.pdf
+*.png
