@@ -7,3 +7,4 @@ paper_psf
 *.pdf
 *.png
 paper/jats
+build
