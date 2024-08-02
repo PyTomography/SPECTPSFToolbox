@@ -6,12 +6,14 @@ from torchvision.transforms.functional import rotate
 from torchvision.transforms import InterpolationMode
 from torch.nn.functional import grid_sample
 from fft_conv_pytorch import fft_conv
-from .utils import pad_object, unpad_object
-from .kernel1d import GaussianKernel1D, Kernel1D
-from .kernel2d import Kernel2D
+from spectpsftoolbox.utils import pad_object, unpad_object
+from spectpsftoolbox.kernel1d import GaussianKernel1D, Kernel1D
+from kernel2d import Kernel2D
 import dill
 
 class Operator:
+    """Base class for operators; operators are used to apply linear shift invariant operations to a sequence of 2D images.
+    """
     def __call__(
         self,
         input: torch.Tensor,
@@ -131,19 +133,19 @@ class Operator:
         return CombinedOperator(combined_operator, [self,other], type='sequential')
     
 class CombinedOperator(Operator):
+    """Operator that has been constructed using two other operators
+
+    Args:
+        func (Callable): Function that specifies how the two operators are combined
+        operators (Sequence[Operator]): Sequence of operators
+        type (str): Type of operator: either 'sequential' or 'additive'
+    """
     def __init__(
         self,
         func: Callable,
         operators: Sequence[Operator],
         type: str
     ) -> None:
-        """Operator that has been constructed using two other operators
-
-        Args:
-            func (Callable): Function that specifies how the two operators are combined
-            operators (Sequence[Operator]): Sequence of operators
-            type (str): Type of operator: either 'sequential' or 'additive'
-        """
         self.params = [*operators[0].params, *operators[1].params]
         self.func = func
         self.type = type
@@ -211,6 +213,15 @@ class CombinedOperator(Operator):
             return self.func(input,xv, yv, a)
     
 class Rotate1DConvOperator(Operator):
+    """Operator that functions by rotating the input by a number of angles and applying a 1D convolution at each angle
+
+    Args:
+        kernel1D (Kernel1D): 1D kernel to apply at each rotation angle
+        N_angles (int): Number of angles to convolve at. Evenly distributes these angles between 0 and 180 degrees (2 angles would be 0, 90 degrees)
+        additive (bool, optional): Use in additive mode; in this case, the initial input is used at each rotation angle. If False, then output from each previous angle is used in succeeding angles. Defaults to False.
+        use_fft_conv (bool, optional): Whether or not to use FFT based convolution. Defaults to False.
+        rot (float, optional): Initial angle offset. Defaults to 0.
+    """
     def __init__(
         self,
         kernel1D: Kernel1D,
@@ -219,15 +230,6 @@ class Rotate1DConvOperator(Operator):
         use_fft_conv: bool = False,
         rot: float = 0
     ) -> None:
-        """Operator that functions by rotating the input by a number of angles and applying a 1D convolution at each angle
-
-        Args:
-            kernel1D (Kernel1D): 1D kernel to apply at each rotation angle
-            N_angles (int): Number of angles to convolve at. Evenly distributes these angles between 0 and 180 degrees (2 angles would be 0, 90 degrees)
-            additive (bool, optional): Use in additive mode; in this case, the initial input is used at each rotation angle. If False, then output from each previous angle is used in succeeding angles. Defaults to False.
-            use_fft_conv (bool, optional): Whether or not to use FFT based convolution. Defaults to False.
-            rot (float, optional): Initial angle offset. Defaults to 0.
-        """
         self.params = kernel1D.params
         self.kernel1D = kernel1D
         self.N_angles = N_angles
@@ -344,6 +346,15 @@ class Rotate1DConvOperator(Operator):
             return input * self._area(xv,yv)
     
 class RotateSeperable2DConvOperator(Operator):
+    """Operator that applies rotations followed by convolutions with two perpendicular 1D kernels (x/y) at each angle
+
+    Args:
+        kernel1D (Kernel1D): Kernel1D to use for convolution
+        N_angles (int): Number of angles to rotate at
+        additive (bool, optional): Use in additive mode; in this case, the initial input is used at each rotation angle. If False, then output from each previous angle is used in succeeding angles. Defaults to False.
+        use_fft_conv (bool, optional): Whether or not to use FFT based convoltution. Defaults to False.
+        rot (float, optional): Initial rotation angle. Defaults to 0.
+    """
     def __init__(
         self,
         kernel1D: Kernel1D,
@@ -352,15 +363,6 @@ class RotateSeperable2DConvOperator(Operator):
         use_fft_conv: bool = False,
         rot: float = 0
     ) -> None:
-        """Operator that applies rotations followed by convolutions with two perpendicular 1D kernels (x/y) at each angle
-
-        Args:
-            kernel1D (Kernel1D): Kernel1D to use for convolution
-            N_angles (int): Number of angles to rotate at
-            additive (bool, optional): Use in additive mode; in this case, the initial input is used at each rotation angle. If False, then output from each previous angle is used in succeeding angles. Defaults to False.
-            use_fft_conv (bool, optional): Whether or not to use FFT based convoltution. Defaults to False.
-            rot (float, optional): Initial rotation angle. Defaults to 0.
-        """
         self.params = kernel1D.params
         self.kernel1D = kernel1D
         self.N_angles = N_angles
@@ -474,17 +476,17 @@ class RotateSeperable2DConvOperator(Operator):
         return input * self._area(xv,yv)
 
 class Kernel2DOperator(Operator):
+    """Operator built using a general 2D kernel; the output of this operator is 2D convolution with the Kernel2D instance
+
+    Args:
+        kernel2D (Kernel2D): Kernel2D instance used for obtaining the generic 2D kernel
+        use_fft_conv (bool, optional): Whether or not to use FFT based convolution. Defaults to False.
+    """
     def __init__(
         self,
         kernel2D: Kernel2D,
         use_fft_conv: bool = False,
     ) -> None:
-        """Operator built using a general 2D kernel; the output of this operator is 2D convolution with the Kernel2D instance
-
-        Args:
-            kernel2D (Kernel2D): Kernel2D instance used for obtaining the generic 2D kernel
-            use_fft_conv (bool, optional): Whether or not to use FFT based convolution. Defaults to False.
-        """
         self.params = kernel2D.params
         self.kernel2D = kernel2D
         self.use_fft_conv = use_fft_conv
@@ -528,6 +530,15 @@ class Kernel2DOperator(Operator):
     
     
 class NearestKernelOperator(Operator):
+    """Operator that uses a set of PSFs and distances to compute the output of the operator. The PSF is obtained by selecting the nearest PSF to each distance provided in __call__ so that each plane in input is convolved with the appropriate kernel.
+
+    Args:
+        psf_data (torch.Tensor[LD,LX,LY]): Provided PSF data
+        distances (torch.Tensor[LD]): Source-detector distance for each PSF
+        dr0 (float): Spacing in the PSF data
+        use_fft_conv (bool, optional): Whether or not to use FFT based convolutions. Defaults to True.
+        grid_sample_mode (str, optional): How to sample the PSF when the input spacing is not the same as the PSF. Defaults to 'bilinear'.
+    """
     def __init__(
         self,
         psf_data: torch.Tensor,
@@ -536,15 +547,6 @@ class NearestKernelOperator(Operator):
         use_fft_conv: bool = True,
         grid_sample_mode: str = 'bilinear'
     ) -> None:
-        """Operator that uses a set of PSFs and distances to compute the output of the operator. The PSF is obtained by selecting the nearest PSF to each distance provided in __call__ so that each plane in input is convolved with the appropriate kernel.
-
-        Args:
-            psf_data (torch.Tensor[LD,LX,LY]): Provided PSF data
-            distances (torch.Tensor[LD]): Source-detector distance for each PSF
-            dr0 (float): Spacing in the PSF data
-            use_fft_conv (bool, optional): Whether or not to use FFT based convolutions. Defaults to True.
-            grid_sample_mode (str, optional): How to sample the PSF when the input spacing is not the same as the PSF. Defaults to 'bilinear'.
-        """
         self.psf_data = psf_data
         self.Nx0 = psf_data.shape[1]
         self.Ny0 = psf_data.shape[2]
@@ -626,6 +628,17 @@ class NearestKernelOperator(Operator):
     
 # TODO: Make subclass of RotateSeperable2DConvOperator with one angle and Gaussian kernel
 class GaussianOperator(Operator):
+    """Gaussian operator; works by convolving the input with two perpendicular 1D kernels. This is implemented seperately from the Kernel2DOperator since it is more efficient to convolve with two 1D kernels than a 2D kernel.
+
+    Args:
+        amplitude_fn (Callable): Amplitude function for 1D Gaussian kernel
+        sigma_fn (Callable): Scale function for 1D Gaussian kernel
+        amplitude_params (torch.Tensor): Amplitude hyperparameters
+        sigma_params (torch.Tensor): Scaling hyperparameters
+        a_min (float, optional): Minimum source-detector distance for the kernel; any distance values passed to __call__ below this value will be clamped to this value. Defaults to -torch.inf.
+        a_max (float, optional):Minimum source-detector distance for the kernel; any distance values passed to __call__ below this value will be clamped to this value. Defaults to torch.inf.
+        use_fft_conv (bool, optional): Whether or not to use FFT based convolution. Defaults to False.
+    """
     def __init__(
         self,
         amplitude_fn: Callable,
@@ -636,17 +649,6 @@ class GaussianOperator(Operator):
         a_max: float = torch.inf,
         use_fft_conv: bool = False,
     ) -> None:
-        """Gaussian operator; works by convolving the input with two perpendicular 1D kernels. This is implemented seperately from the Kernel2DOperator since it is more efficient to convolve with two 1D kernels than a 2D kernel.
-
-        Args:
-            amplitude_fn (Callable): Amplitude function for 1D Gaussian kernel
-            sigma_fn (Callable): Scale function for 1D Gaussian kernel
-            amplitude_params (torch.Tensor): Amplitude hyperparameters
-            sigma_params (torch.Tensor): Scaling hyperparameters
-            a_min (float, optional): Minimum source-detector distance for the kernel; any distance values passed to __call__ below this value will be clamped to this value. Defaults to -torch.inf.
-            a_max (float, optional):Minimum source-detector distance for the kernel; any distance values passed to __call__ below this value will be clamped to this value. Defaults to torch.inf.
-            use_fft_conv (bool, optional): Whether or not to use FFT based convolution. Defaults to False.
-        """
         self.amplitude_fn = amplitude_fn
         self.sigma_fn = sigma_fn
         self.amplitude_params = amplitude_params
