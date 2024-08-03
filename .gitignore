@@ -5,6 +5,6 @@ notebook_testing
 *docs/build*
 paper_psf
 *.pdf
-*.png
 paper/jats
 build
+paper/figures
