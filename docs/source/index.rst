@@ -10,6 +10,16 @@ The ``SPECTPSFToolbox`` is a collection of python functions and classes that can
 
 In traditional SPECT reconstruction, only the geometric component of the PSF is considered; this library provides a means for modeling the septal scatter and septal penetration components, permitting more accurate image reconstruction when these components are significant.
 
+Installation
+++++++++++++++++++++
+
+1. Clone `the repository <https://github.com/lukepolson/SPECTPSFToolbox>`_, and ``cd`` to the directory you cloned the repository to in a terminal.
+2. If using anaconda (recommended), then activate the ``conda`` environment you want to install the repository in.
+3. Use the command ``python -m pip install -e .`` to install the repository locally.
+
+Resources
+++++++++++++++++++++
+
 .. grid:: 1 3 3 3
     :gutter: 2
     
