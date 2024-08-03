@@ -14,7 +14,7 @@ In traditional SPECT reconstruction, only the geometric component of the PSF is 
     :gutter: 2
     
     .. grid-item-card:: Tutorials
-        :link: tutorials
+        :link: tutorials/tutorials
         :link-type: doc
         :link-alt: Tutorials
         :text-align: center
@@ -51,3 +51,9 @@ In traditional SPECT reconstruction, only the geometric component of the PSF is 
             :color: warning
 
             **Ask questions on PyTomography discourse**
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   tutorials/tutorials
