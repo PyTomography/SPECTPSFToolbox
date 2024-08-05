@@ -8,7 +8,7 @@ tags:
   - image reconstruction
 authors:
   - name: Luke Polson
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-3182-2782
     corresponding: true
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: Carlos Uribe
