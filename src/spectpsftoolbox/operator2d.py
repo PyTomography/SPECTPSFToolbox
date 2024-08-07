@@ -8,7 +8,7 @@ from torch.nn.functional import grid_sample
 from fft_conv_pytorch import fft_conv
 from spectpsftoolbox.utils import pad_object, unpad_object
 from spectpsftoolbox.kernel1d import GaussianKernel1D, Kernel1D
-from kernel2d import Kernel2D
+from spectpsftoolbox.kernel2d import Kernel2D
 import dill
 
 class Operator:
