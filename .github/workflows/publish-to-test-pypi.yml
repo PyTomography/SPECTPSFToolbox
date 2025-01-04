@@ -1,6 +1,13 @@
-name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+name: Publish 🐍 to PyPI on Release
 
-on: push
+on:
+  release:
+    types:
+      - created  # Trigger when a release is created (new or re-created)
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build-n-publish:
